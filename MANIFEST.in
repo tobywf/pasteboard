@@ -1,0 +1,4 @@
+include pasteboard.m
+include setup.py
+include LICENSE.txt
+include README.rst
