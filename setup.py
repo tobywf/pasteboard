@@ -18,7 +18,7 @@ pasteboard = Extension(
 
 setup(
     name='pasteboard',
-    version='0.1.0.dev1',
+    version='0.2.0',
     description=__doc__,
     long_description=readme,
     author='Toby Fleming',

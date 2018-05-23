@@ -1,6 +1,6 @@
 /*
     Pasteboard - Python interface for reading from NSPasteboard (macOS clipboard)
-    Copyright (C) 2017  Toby Fleming
+    Copyright (C) 2017-2018  Toby Fleming
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -186,7 +186,7 @@ pasteboard_get_contents(PyObject *self, PyObject *args, PyObject *kwargs)
 
     long long change_count = [state->board changeCount];
 
-    if (diff && change_count == state->change_count) {
+    if (diff && (change_count == state->change_count)) {
         Py_RETURN_NONE;
     }
 
@@ -208,6 +208,80 @@ PyDoc_STRVAR(pasteboard_get_contents__doc__,
 "or `diff` was set to `True` and the contents has not changed since "
 "the last query.");
 
+static PyObject *
+set_contents(NSPasteboard *board, PasteboardTypeState* type, const char *bytes, Py_ssize_t length)
+{
+    switch (type->read) {
+        case DATA: {
+            NSData* data = [NSData
+                dataWithBytesNoCopy:(void *)bytes
+                length:length
+                freeWhenDone:FALSE];
+            if (!data) {
+                PyErr_SetString(PyExc_RuntimeError, "Failed to allocate data");
+                return NULL;
+            }
+
+            [board clearContents];
+            if ([board setData:data forType:type->type]) {
+                Py_RETURN_TRUE;
+            } else {
+                Py_RETURN_FALSE;
+            }
+        }
+
+        case STRING: {
+            NSString *str = [[NSString alloc]
+                initWithBytesNoCopy:(void *)bytes
+                length:length
+                encoding:NSUTF8StringEncoding
+                freeWhenDone:FALSE];
+            if (!str) {
+                PyErr_SetString(PyExc_RuntimeError, "Failed to allocate string");
+                return NULL;
+            }
+
+            [board clearContents];
+            if ([board setString:str forType:type->type]) {
+                Py_RETURN_TRUE;
+            } else {
+                Py_RETURN_FALSE;
+            }
+        }
+
+        default:
+            Py_RETURN_NONE;
+    }
+}
+
+static PyObject *
+pasteboard_set_contents(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    PasteboardState *state = (PasteboardState *)self;
+
+    PyObject *type = PasteboardType_Default;
+    const char *bytes = NULL;
+    Py_ssize_t length = 0;
+
+    static char *kwlist[] = {"data", "type", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(
+            args, kwargs, "s#|O!", kwlist,
+            &bytes, &length, &PasteboardTypeType, &type)) {
+        return NULL;
+    }
+
+    return set_contents(state->board, (PasteboardTypeState *)type, bytes, length);
+}
+
+PyDoc_STRVAR(pasteboard_set_contents__doc__,
+"set_contents(data, type) -> True/False/None\n\n"
+"Sets the contents of the pasteboard.\n\n"
+"data - str or bytes-like object. If type is a string type and bytes is not "
+"UTF-8 encoded, the behaviour is undefined.\n"
+"type - The NSPasteboardType to get, see module members. Default is 'String'.\n"
+"Returns `True` if the operation was successful; otherwise, `False`.");
+
 static PyMethodDef pasteboard_methods[] = {
     {
         "get_contents",
@@ -215,11 +289,17 @@ static PyMethodDef pasteboard_methods[] = {
         METH_VARARGS | METH_KEYWORDS,
         pasteboard_get_contents__doc__,
     },
+    {
+        "set_contents",
+        (PyCFunction)pasteboard_set_contents,
+        METH_VARARGS | METH_KEYWORDS,
+        pasteboard_set_contents__doc__,
+    },
     {NULL}  /* Sentinel */
 };
 
 PyDoc_STRVAR(pasteboard__doc__,
-"Holds a reference to the global pasteboard for reading.");
+"Holds a reference to the global pasteboard for reading and writing.");
 
 PyTypeObject PasteboardType = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
@@ -266,7 +346,7 @@ PyTypeObject PasteboardType = {
 static void
 module_free(void *);
 
-PyDoc_STRVAR(module__doc__, "Python interface for reading from NSPasteboard (macOS clipboard)");
+PyDoc_STRVAR(module__doc__, "Python interface for NSPasteboard (macOS clipboard)");
 
 static struct PyModuleDef pasteboard_module = {
    PyModuleDef_HEAD_INIT,
