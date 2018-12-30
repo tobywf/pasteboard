@@ -35,6 +35,8 @@ setup(
         'Operating System :: MacOS :: MacOS X',
         'Programming Language :: Objective C',
         'Programming Language :: Python :: 3 :: Only',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: Implementation :: CPython',
         'Topic :: Desktop Environment',
         'Topic :: Software Development :: Libraries',
