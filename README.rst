@@ -79,31 +79,19 @@ converted to an AppKit type.
 Development
 -----------
 
-(You don't need to know this if you're not changing ``pasteboard.m`` code.)
-
-In the repository, I've included a ``Pipfile`` that can be used with `pipenv`_
-to install all dependencies for testing (pasteboard has no Python dependencies
-itself). There are some integration tests in ``tests.py`` to check the module
-works as designed (using `pytest`_ and `hypothesis`_).
+You don't need to know this if you're not changing ``pasteboard.m`` code. There
+are some integration tests in ``tests.py`` to check the module works as
+designed (using `pytest`_ and `hypothesis`_, via `tox`_).
 
 .. code-block:: console
 
-    $ pipenv install
-    $ pipenv run pytest tests.py --hypothesis-show-statistics
+    $ tox
 
-To clean up:
+To clean up (make sure you have committed all work!):
 
 .. code-block:: console
 
-    $ pipenv --rm
-    $ rm -rf \
-        .hypothesis/ \
-        .pytest_cache/ \
-        build/ \
-        pasteboard.egg-info/ \
-        __pycache__/ \
-        pasteboard.*.so \
-        Pipfile.lock
+    $ git clean -xdf
 
 .. _Pasteboard: https://pypi.org/project/pasteboard/
 .. _NSPasteboard: https://developer.apple.com/documentation/appkit/nspasteboard
@@ -113,6 +101,6 @@ To clean up:
 .. _bytes: https://docs.python.org/3/library/stdtypes.html#bytes
 .. _bytes-like object: https://docs.python.org/3/glossary.html#term-bytes-like-object
 .. _RuntimeError: https://docs.python.org/3/library/exceptions.html#RuntimeError
-.. _pipenv: https://docs.pipenv.org/
 .. _pytest: https://docs.pytest.org/en/latest/
 .. _hypothesis: https://hypothesis.readthedocs.io/en/latest/
+.. _tox: https://tox.readthedocs.io/en/latest/
