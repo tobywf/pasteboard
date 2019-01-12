@@ -298,6 +298,7 @@ static struct PyModuleDef pasteboard_module = {
 #define QUOTE(str) #str
 #define PASTEBOARD_TYPE(name, read)  \
     PyObject *__##name = pasteboardtype_new(NSPasteboardType##name, read); \
+    Py_INCREF(__##name); \
     if (PyModule_AddObject(module, QUOTE(name), __##name) < 0) {  \
         return NULL;  \
     }
