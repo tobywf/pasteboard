@@ -108,7 +108,7 @@ typedef struct {
 } PasteboardState;
 
 static PyObject *
-pasteboard_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
+pasteboard_new(PyTypeObject *type, PyObject *Py_UNUSED(args), PyObject *Py_UNUSED(kwargs))
 {
     PasteboardState *state = (PasteboardState *)type->tp_alloc(type, 0);
     if (!state) {
@@ -412,7 +412,7 @@ PyInit_pasteboard(void)
 }
 
 static void
-module_free(void *unused)
+module_free(void *Py_UNUSED(unused))
 {
     if (pool) {
         [pool release];
