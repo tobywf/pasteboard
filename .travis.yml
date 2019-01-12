@@ -1,0 +1,5 @@
+language: objective-c
+sudo: true
+os: osx
+install: ./.travis/install-osx.sh
+script: env/bin/tox -vvv
