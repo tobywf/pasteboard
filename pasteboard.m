@@ -263,7 +263,7 @@ static PyMethodDef pasteboard_methods[] = {
         METH_VARARGS | METH_KEYWORDS,
         pasteboard_set_contents__doc__,
     },
-    {NULL}  /* Sentinel */
+    {NULL, NULL, 0, NULL}  /* Sentinel */
 };
 
 PyDoc_STRVAR(pasteboard__doc__,
