@@ -46,44 +46,12 @@ PyDoc_STRVAR(pasteboardtype__doc__,
 
 PyTypeObject PasteboardTypeType = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
-    "pasteboard.PasteboardType",    /* tp_name */
-    sizeof(PasteboardTypeState),    /* tp_basicsize */
-    0,                              /* tp_itemsize */
-    /* methods */
-    0,                              /* tp_dealloc */
-    0,                              /* tp_print */
-    0,                              /* tp_getattr */
-    0,                              /* tp_setattr */
-    0,                              /* tp_reserved */
-    pasteboardtype_repr,            /* tp_repr */
-    0,                              /* tp_as_number */
-    0,                              /* tp_as_sequence */
-    0,                              /* tp_as_mapping */
-    0,                              /* tp_hash */
-    0,                              /* tp_call */
-    0,                              /* tp_str */
-    0,                              /* tp_getattro */
-    0,                              /* tp_setattro */
-    0,                              /* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT,             /* tp_flags */
-    pasteboardtype__doc__,          /* tp_doc */
-    0,                              /* tp_traverse */
-    0,                              /* tp_clear */
-    0,                              /* tp_richcompare */
-    0,                              /* tp_weaklistoffset */
-    0,                              /* tp_iter */
-    0,                              /* tp_iternext */
-    0,                              /* tp_methods */
-    0,                              /* tp_members */
-    0,                              /* tp_getset */
-    0,                              /* tp_base */
-    0,                              /* tp_dict */
-    0,                              /* tp_descr_get */
-    0,                              /* tp_descr_set */
-    0,                              /* tp_dictoffset */
-    0,                              /* tp_init */
-    PyType_GenericAlloc,            /* tp_alloc */
-    0,                              /* tp_new */
+    .tp_name = "pasteboard.PasteboardType",
+    .tp_doc = pasteboardtype__doc__,
+    .tp_basicsize = sizeof(PasteboardTypeState),
+    .tp_itemsize = 0,
+    .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_repr = pasteboardtype_repr,
 };
 
 // PasteboardTypes cannot be created by anybody but this module
@@ -303,44 +271,15 @@ PyDoc_STRVAR(pasteboard__doc__,
 
 PyTypeObject PasteboardType = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
-    "pasteboard.Pasteboard",        /* tp_name */
-    sizeof(PasteboardState),        /* tp_basicsize */
-    0,                              /* tp_itemsize */
-    /* methods */
-    pasteboard_dealloc,             /* tp_dealloc */
-    0,                              /* tp_print */
-    0,                              /* tp_getattr */
-    0,                              /* tp_setattr */
-    0,                              /* tp_reserved */
-    pasteboard_repr,                /* tp_repr */
-    0,                              /* tp_as_number */
-    0,                              /* tp_as_sequence */
-    0,                              /* tp_as_mapping */
-    0,                              /* tp_hash */
-    0,                              /* tp_call */
-    0,                              /* tp_str */
-    0,                              /* tp_getattro */
-    0,                              /* tp_setattro */
-    0,                              /* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */
-    pasteboard__doc__,              /* tp_doc */
-    0,                              /* tp_traverse */
-    0,                              /* tp_clear */
-    0,                              /* tp_richcompare */
-    0,                              /* tp_weaklistoffset */
-    0,                              /* tp_iter */
-    0,                              /* tp_iternext */
-    pasteboard_methods,             /* tp_methods */
-    0,                              /* tp_members */
-    0,                              /* tp_getset */
-    0,                              /* tp_base */
-    0,                              /* tp_dict */
-    0,                              /* tp_descr_get */
-    0,                              /* tp_descr_set */
-    0,                              /* tp_dictoffset */
-    0,                              /* tp_init */
-    PyType_GenericAlloc,            /* tp_alloc */
-    pasteboard_new,                 /* tp_new */
+    .tp_name = "pasteboard.Pasteboard",
+    .tp_doc = pasteboard__doc__,
+    .tp_basicsize = sizeof(PasteboardState),
+    .tp_itemsize = 0,
+    .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
+    .tp_dealloc = pasteboard_dealloc,
+    .tp_repr = pasteboard_repr,
+    .tp_methods = pasteboard_methods,
+    .tp_new = pasteboard_new,
 };
 
 static void
@@ -350,14 +289,10 @@ PyDoc_STRVAR(module__doc__, "Python interface for NSPasteboard (macOS clipboard)
 
 static struct PyModuleDef pasteboard_module = {
    PyModuleDef_HEAD_INIT,
-   "pasteboard",            /* m_name */
-   module__doc__,           /* m_doc */
-   -1,                      /* m_size */
-   NULL,                    /* m_methods */
-   NULL,                    /* m_slots */
-   NULL,                    /* m_traverse */
-   NULL,                    /* m_clear */
-   module_free              /* m_free */
+   .m_name = "pasteboard",
+   .m_doc = module__doc__,
+   .m_size = -1,
+   .m_free = module_free,
 };
 
 #define QUOTE(str) #str
