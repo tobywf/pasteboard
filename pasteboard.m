@@ -142,7 +142,7 @@ pasteboard_get_contents(PyObject *self, PyObject *args, PyObject *kwargs)
     PasteboardState *state = (PasteboardState *)self;
 
     PyObject *type = PasteboardType_Default;
-    bool diff = FALSE;
+    int diff = 0; // FALSE
 
     static char *kwlist[] = {"type", "diff", NULL};
 
