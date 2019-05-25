@@ -31,4 +31,4 @@ set +u
 source "env/bin/activate"
 set -u
 
-pip install -U tox
+pip install -U tox tox-venv
