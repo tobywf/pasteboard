@@ -1,11 +1,16 @@
 #!/bin/bash
 set -xeuo pipefail
 
-for PYVER3 in "3.6.8" "3.7.2"; do
+for PYVER3 in "3.6.8" "3.7.3" "3.8.0"; do
     # Python version number in different formats
     PYVER2=${PYVER3:0:3}
 
-    PYINST="python-$PYVER3-macosx10.9.pkg"
+    if [[ "$PYVER3" == "3.8.0" ]]; then
+        PYINST="python-3.8.0a4-macosx10.9.pkg"
+    else
+        PYINST="python-$PYVER3-macosx10.9.pkg"
+    fi
+
     URL="https://www.python.org/ftp/python/$PYVER3/$PYINST"
 
     echo "$PYVER2 ($PYVER3) - $URL"
