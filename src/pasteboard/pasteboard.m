@@ -1,21 +1,13 @@
 /*
     Pasteboard - Python interface for reading from NSPasteboard (macOS clipboard)
-    Copyright (C) 2017-2018  Toby Fleming
+    Copyright (C) 2017-2020  Toby Fleming
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at https://mozilla.org/MPL/2.0/.
 */
 #include <AppKit/AppKit.h>
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
 // TODO: figure out how NSAutoreleasePool works with sub-interpreters
@@ -26,7 +18,7 @@ static NSAutoreleasePool *pool = NULL;
 typedef NSString * NSPasteboardType;
 static PyObject *PasteboardType_Default = NULL;
 
-typedef enum {DATA, STRING, PROP} PasteboardTypeReading;
+typedef enum {DATA, STRING} PasteboardTypeReading;
 typedef struct {
     PyObject_HEAD
     NSPasteboardType type;
@@ -132,7 +124,8 @@ get_contents(NSPasteboard *board, PasteboardTypeState* type)
         }
 
         default:
-            Py_RETURN_NONE;
+            PyErr_SetString(PyExc_RuntimeError, "Unknown pasteboard type");
+            return NULL;
     }
 }
 
@@ -218,7 +211,8 @@ set_contents(NSPasteboard *board, PasteboardTypeState* type, const char *bytes, 
         }
 
         default:
-            Py_RETURN_NONE;
+            PyErr_SetString(PyExc_RuntimeError, "Unknown pasteboard type");
+            return NULL;
     }
 }
 
@@ -289,7 +283,7 @@ PyDoc_STRVAR(module__doc__, "Python interface for NSPasteboard (macOS clipboard)
 
 static struct PyModuleDef pasteboard_module = {
    PyModuleDef_HEAD_INIT,
-   .m_name = "pasteboard",
+   .m_name = "_native",
    .m_doc = module__doc__,
    .m_size = -1,
    .m_free = module_free,
@@ -304,7 +298,7 @@ static struct PyModuleDef pasteboard_module = {
     }
 
 PyMODINIT_FUNC
-PyInit_pasteboard(void)
+PyInit__native(void)
 {
     pool = [[NSAutoreleasePool alloc] init];
     if (!pool) {
