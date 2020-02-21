@@ -294,7 +294,7 @@ static struct PyModuleDef pasteboard_module = {
     PyObject *__##name = pasteboardtype_new(NSPasteboardType##name, read); \
     Py_INCREF(__##name); \
     if (PyModule_AddObject(module, QUOTE(name), __##name) < 0) {  \
-        return NULL;  \
+        goto except;  \
     }
 
 PyMODINIT_FUNC
@@ -315,7 +315,7 @@ PyInit__native(void)
 
     PyObject *module = PyModule_Create(&pasteboard_module);
     if (!module) {
-        return NULL;
+        goto except;
     }
 
     // PASTEBOARD_TYPE(Color, ???)
@@ -336,8 +336,15 @@ PyInit__native(void)
     // PASTEBOARD_TYPE(TextFinderOptions, PROP)
 
     Py_INCREF((PyObject *)&PasteboardType);
-    PyModule_AddObject(module, "Pasteboard", (PyObject *)&PasteboardType);
+    if (PyModule_AddObject(module, "Pasteboard", (PyObject *)&PasteboardType) < 0) {
+        goto except;
+    }
 
+    goto finally;
+except:
+    Py_XDECREF(module);
+    module = NULL;
+finally:
     return module;
 }
 

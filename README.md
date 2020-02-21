@@ -4,6 +4,8 @@
 
 [Pasteboard](https://pypi.org/project/pasteboard/) exposes Python bindings for reading and writing macOS' AppKit [NSPasteboard](https://developer.apple.com/documentation/appkit/nspasteboard). This allows retrieving different formats (HTML/RTF fragments, PDF/PNG/TIFF) and efficient polling of the pasteboard.
 
+Now with type hints!
+
 ## Installation
 
 Obviously, this module will only compile on **macOS**:
@@ -63,6 +65,30 @@ takes two arguments:
 ## Development
 
 You don't need to know this if you're not changing `pasteboard.m` code. There are some integration tests in `tests.py` to check the module works as designed (using [pytest](https://docs.pytest.org/en/latest/) and [hypothesis](https://hypothesis.readthedocs.io/en/latest/)).
+
+This project uses [pre-commit](https://pre-commit.com/) to run some linting hooks when committing. When you first clone the repo, please run:
+
+```
+pre-commit install
+```
+
+You may also run the hooks at any time:
+
+```
+pre-commit run --all-files
+```
+
+Dependencies are managed via [poetry](https://python-poetry.org/). To install all dependencies, use:
+
+```
+poetry install
+```
+
+This will also install development dependencies (`pytest`). To run the tests:
+
+```
+poetry run pytest tests.py --verbose
+```
 
 ## License
 
