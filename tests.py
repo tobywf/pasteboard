@@ -184,7 +184,7 @@ if s:
     assert exit_status == 0, normal_report
 
 
-@pytest.mark.parametrize("arg", ['"bar"', 'foo="bar"', 'type="bar"', 'diff="bar"',])
+@pytest.mark.parametrize("arg", ['"bar"', 'foo="bar"', 'type="bar"', 'diff="bar"'])
 def test_type_hints_get_contents_invalid_arg(arg, tmp_path):
     normal_report, error_report, exit_status = mypy_run(
         tmp_path,
@@ -198,7 +198,7 @@ pb.get_contents({arg})
     assert "No overload variant" in normal_report
 
 
-@pytest.mark.parametrize("arg", ['"bar"', 'b"bar"',])
+@pytest.mark.parametrize("arg", ['"bar"', 'b"bar"'])
 def test_type_hints_set_contents_valid_no_args(arg, tmp_path):
     normal_report, error_report, exit_status = mypy_run(
         tmp_path,
@@ -211,7 +211,7 @@ result: bool = pb.set_contents({arg})
     assert exit_status == 0, normal_report
 
 
-@pytest.mark.parametrize("arg", ['"bar"', 'b"bar"',])
+@pytest.mark.parametrize("arg", ['"bar"', 'b"bar"'])
 def test_type_hints_set_contents_valid_type_args(arg, tmp_path):
     normal_report, error_report, exit_status = mypy_run(
         tmp_path,
