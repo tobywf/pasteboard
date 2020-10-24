@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pasteboard"
-version = "0.3.1"
+version = "0.3.2"
 description = "Pasteboard - Python interface for reading from NSPasteboard (macOS clipboard)"
 authors = ["Toby Fleming <tobywf@users.noreply.github.com>"]
 license = "MPL-2.0"
@@ -17,6 +17,7 @@ classifiers = [
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Desktop Environment",
     "Topic :: Software Development :: Libraries",
@@ -28,10 +29,11 @@ build = "build.py"
 python = "^3.6"
 
 [tool.poetry.dev-dependencies]
-black = "^19.10b0"
-pytest = "^5.3.5"
-hypothesis = "^5.5.4"
-mypy = "^0.761"
+black = "^20.8b1"
+pytest = "^6.1.1"
+hypothesis = "^5.37.4"
+mypy = "^0.790"
 
 [build-system]
-requires = ["poetry>=1.0.0"]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
