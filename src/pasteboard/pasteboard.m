@@ -18,7 +18,7 @@ static NSAutoreleasePool *pool = NULL;
 typedef NSString * NSPasteboardType;
 static PyObject *PasteboardType_Default = NULL;
 
-typedef enum {DATA, STRING, URL} PasteboardTypeReading;
+typedef enum {DATA, STRING} PasteboardTypeReading;
 typedef struct {
     PyObject_HEAD
     NSPasteboardType type;
@@ -123,17 +123,6 @@ get_contents(NSPasteboard *board, PasteboardTypeState* type)
             return PyUnicode_FromString([str UTF8String]);
         }
 
-        case URL: {
-            // TODO: this seems to work for now... possibly, it would be better
-            // to use NSURL's URLFromPasteboard
-            NSString *str = [board stringForType:type->type];
-            if (!str) {
-                Py_RETURN_NONE;
-            }
-
-            return PyUnicode_FromString([str UTF8String]);
-        }
-
         default:
             PyErr_SetString(PyExc_RuntimeError, "Unknown pasteboard type");
             return NULL;
@@ -168,7 +157,7 @@ pasteboard_get_contents(PyObject *self, PyObject *args, PyObject *kwargs)
 }
 
 PyDoc_STRVAR(pasteboard_get_contents__doc__,
-"get_contents(type, diff=False) -> str/bytes/None\n\n"
+"get_contents(type: PasteboardType = String, diff: bool = False) -> Union[str, bytes, None]\n\n"
 "Gets the contents of the pasteboard.\n\n"
 "type - The NSPasteboardType to get, see module members. Default is 'String'.\n"
 "diff - Only get the contents if it has changed. Otherwise, `None` is returned. "
@@ -221,11 +210,6 @@ set_contents(NSPasteboard *board, PasteboardTypeState* type, const char *bytes, 
             }
         }
 
-        case URL: {
-            PyErr_SetString(PyExc_RuntimeError, "URL pasteboard types cannot be set");
-            return NULL;
-        }
-
         default:
             PyErr_SetString(PyExc_RuntimeError, "Unknown pasteboard type");
             return NULL;
@@ -253,12 +237,73 @@ pasteboard_set_contents(PyObject *self, PyObject *args, PyObject *kwargs)
 }
 
 PyDoc_STRVAR(pasteboard_set_contents__doc__,
-"set_contents(data, type) -> True/False/None\n\n"
+"set_contents(data: Union[str, bytes], type: PasteboardType = String) -> bool\n\n"
 "Sets the contents of the pasteboard.\n\n"
 "data - str or bytes-like object. If type is a string type and bytes is not "
 "UTF-8 encoded, the behaviour is undefined.\n"
 "type - The NSPasteboardType to get, see module members. Default is 'String'.\n"
 "Returns `True` if the operation was successful; otherwise, `False`.");
+
+static PyObject *
+pasteboard_get_file_urls(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    PasteboardState *state = (PasteboardState *)self;
+    int diff = 0; // FALSE
+
+    static char *kwlist[] = {"diff", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|p", kwlist, &diff)) {
+        return NULL;
+    }
+
+    long long change_count = [state->board changeCount];
+
+    if (diff && (change_count == state->change_count)) {
+        Py_RETURN_NONE;
+    }
+
+    state->change_count = change_count;
+
+    // hopefully guard against non-file URLs
+    NSArray *supportedTypes = @[NSPasteboardTypeFileURL];
+    NSString *bestType = [state->board availableTypeFromArray:supportedTypes];
+    if (!bestType) {
+        Py_RETURN_NONE;
+    }
+
+    NSArray<Class> *classes = @[[NSURL class]];
+    NSDictionary *options = @{};
+    NSArray<NSURL*> *files = [state->board readObjectsForClasses:classes options:options];
+
+    Py_ssize_t len = (Py_ssize_t)[files count];
+    PyObject *urls = PyTuple_New(len);
+    Py_ssize_t pos = 0;
+    for (NSURL *url in files) {
+        NSString *str = [url path];
+        if ([url isFileURL] && str) {
+            PyTuple_SetItem(urls, pos, PyUnicode_FromString([str UTF8String]));
+            pos++;
+        }
+    }
+
+    if (len != pos) {
+        if (_PyTuple_Resize(&urls, pos) != 0) {
+            PyErr_SetString(PyExc_RuntimeError, "Internal error: failed to resize tuple");
+            return NULL;
+        }
+    }
+    return urls;
+}
+
+PyDoc_STRVAR(pasteboard_get_file_urls__doc__,
+"get_file_urls(diff: bool = False) -> Optional[Sequence[str]]\n\n"
+"Gets the contents of the pasteboard as file URLs.\n\n"
+"diff - Only get the contents if it has changed. Otherwise, `None` is returned. "
+"Can be used for efficiently querying the pasteboard when polling for changes."
+"Default is `False`.\n\n"
+"Returns a sequence of strings corresponding to the file URL's path. "
+"`None` is returned if an error occurred, there is no data of the requested "
+"type, or `diff` was set to `True` and the contents has not changed since "
+"the last query.");
 
 static PyMethodDef pasteboard_methods[] = {
     {
@@ -272,6 +317,12 @@ static PyMethodDef pasteboard_methods[] = {
         (PyCFunction)pasteboard_set_contents,
         METH_VARARGS | METH_KEYWORDS,
         pasteboard_set_contents__doc__,
+    },
+    {
+        "get_file_urls",
+        (PyCFunction)pasteboard_get_file_urls,
+        METH_VARARGS | METH_KEYWORDS,
+        pasteboard_get_file_urls__doc__,
     },
     {NULL, NULL, 0, NULL}  /* Sentinel */
 };
@@ -342,7 +393,6 @@ PyInit__native(void)
     PasteboardType_Default = __String;
     PASTEBOARD_TYPE(TIFF, DATA)
     PASTEBOARD_TYPE(TabularText, STRING)
-    PASTEBOARD_TYPE(FileURL, URL)
 
     Py_INCREF((PyObject *)&PasteboardType);
     if (PyModule_AddObject(module, "Pasteboard", (PyObject *)&PasteboardType) < 0) {

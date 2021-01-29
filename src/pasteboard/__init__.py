@@ -8,3 +8,9 @@ import sys as _sys
 assert _sys.platform == "darwin", "pasteboard only works on macOS"
 
 from ._native import *
+
+
+class PasteboardType:
+    """Make type hints not fail on import - don't use this class"""
+
+    pass

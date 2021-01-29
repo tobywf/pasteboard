@@ -60,7 +60,20 @@ takes two arguments:
 
 **type** - The format to set. Defaults to `pasteboard.String`, which corresponds to [NSPasteboardTypeString](https://developer.apple.com/documentation/appkit/nspasteboardtypestring?language=objc). See the `pasteboard` module members for other options such as HTML fragment, RTF, PDF, PNG, and TIFF. Not all formats of [NSPasteboardType](https://developer.apple.com/documentation/appkit/nspasteboardtype?language=objc) are implemented.
 
-`set_contents` will return `True` if the pasteboard was successfully set; otherwise, `False`. It may also throw [RuntimeError](https://docs.python.org/3/library/exceptions.html#RuntimeError) if `data` can't be converted to an AppKit type, or if you attempt to set the `FileURL` type (since this doesn't work well).
+`set_contents` will return `True` if the pasteboard was successfully set; otherwise, `False`. It may also throw [RuntimeError](https://docs.python.org/3/library/exceptions.html#RuntimeError) if `data` can't be converted to an AppKit type.
+
+### Getting file URLs
+
+```pycon
+>>> import pasteboard
+>>> pb = pasteboard.Pasteboard()
+>>> pb.get_file_urls()
+('/Users/<user>/Documents/foo.txt', '/Users/<user>/Documents/bar.txt')
+```
+
+**Warning** This API is new, and may change in future.
+
+Returns a `Tuple` of strings, or `None`. Also supports the **diff** parameter analogue to `get_contents`.
 
 ## Development
 
