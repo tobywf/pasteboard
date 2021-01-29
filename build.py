@@ -13,4 +13,4 @@ pasteboard = Extension(
 
 
 def build(setup_kwargs):
-    setup_kwargs["ext_modules"] = [pasteboard]
+    setup_kwargs.update({"ext_modules": [pasteboard], "zip_safe": False})
