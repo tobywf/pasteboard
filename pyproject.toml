@@ -35,5 +35,5 @@ hypothesis = "^5.37.4"
 mypy = "^0.790"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry_core>=1.0.0", "setuptools"]
 build-backend = "poetry.core.masonry.api"
