@@ -1,6 +1,6 @@
 /*
     Pasteboard - Python interface for reading from NSPasteboard (macOS clipboard)
-    Copyright (C) 2017-2020  Toby Fleming
+    Copyright (C) 2017-2021  Toby Fleming
 
     This Source Code Form is subject to the terms of the Mozilla Public License,
     v. 2.0. If a copy of the MPL was not distributed with this file, You can
@@ -18,7 +18,7 @@ static NSAutoreleasePool *pool = NULL;
 typedef NSString * NSPasteboardType;
 static PyObject *PasteboardType_Default = NULL;
 
-typedef enum {DATA, STRING} PasteboardTypeReading;
+typedef enum {DATA, STRING, URL} PasteboardTypeReading;
 typedef struct {
     PyObject_HEAD
     NSPasteboardType type;
@@ -123,6 +123,17 @@ get_contents(NSPasteboard *board, PasteboardTypeState* type)
             return PyUnicode_FromString([str UTF8String]);
         }
 
+        case URL: {
+            // TODO: this seems to work for now... possibly, it would be better
+            // to use NSURL's URLFromPasteboard
+            NSString *str = [board stringForType:type->type];
+            if (!str) {
+                Py_RETURN_NONE;
+            }
+
+            return PyUnicode_FromString([str UTF8String]);
+        }
+
         default:
             PyErr_SetString(PyExc_RuntimeError, "Unknown pasteboard type");
             return NULL;
@@ -208,6 +219,11 @@ set_contents(NSPasteboard *board, PasteboardTypeState* type, const char *bytes, 
             } else {
                 Py_RETURN_FALSE;
             }
+        }
+
+        case URL: {
+            PyErr_SetString(PyExc_RuntimeError, "URL pasteboard types cannot be set");
+            return NULL;
         }
 
         default:
@@ -318,22 +334,15 @@ PyInit__native(void)
         goto except;
     }
 
-    // PASTEBOARD_TYPE(Color, ???)
-    // PASTEBOARD_TYPE(FindPanelSearchOptions, PROP)
-    // PASTEBOARD_TYPE(Font, ???)
     PASTEBOARD_TYPE(HTML, STRING)
-    // PASTEBOARD_TYPE(MultipleTextSelection, ???)
     PASTEBOARD_TYPE(PDF, DATA)
     PASTEBOARD_TYPE(PNG, DATA)
     PASTEBOARD_TYPE(RTF, STRING)
-    // PASTEBOARD_TYPE(RTFD, STRING)
-    // PASTEBOARD_TYPE(Ruler, ???)
-    // PASTEBOARD_TYPE(Sound, ???)
     PASTEBOARD_TYPE(String, STRING)
     PasteboardType_Default = __String;
     PASTEBOARD_TYPE(TIFF, DATA)
     PASTEBOARD_TYPE(TabularText, STRING)
-    // PASTEBOARD_TYPE(TextFinderOptions, PROP)
+    PASTEBOARD_TYPE(FileURL, URL)
 
     Py_INCREF((PyObject *)&PasteboardType);
     if (PyModule_AddObject(module, "Pasteboard", (PyObject *)&PasteboardType) < 0) {

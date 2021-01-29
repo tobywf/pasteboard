@@ -73,10 +73,18 @@ def test_get_set_contents_with_emoji_santa():
         (pasteboard.PDF, "com.adobe.pdf"),
         (pasteboard.PNG, "public.png"),
         (pasteboard.TIFF, "public.tiff"),
+        (pasteboard.FileURL, "public.file-url"),
     ],
 )
 def test_types_repr(type, name):
     assert repr(type) == "<PasteboardType {}>".format(name)
+
+
+def test_file_url_cannot_be_set():
+    pb = pasteboard.Pasteboard()
+    with pytest.raises(RuntimeError) as excinfo:
+        pb.set_contents("file://foo.bar", type=pasteboard.FileURL)
+    assert "cannot be set" in str(excinfo.value)
 
 
 def mypy_run(tmp_path, content):
