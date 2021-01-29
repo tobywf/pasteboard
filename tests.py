@@ -2,7 +2,10 @@ import pasteboard
 import pytest
 import mypy.api
 
-from hypothesis import assume, given, strategies as st
+from hypothesis import given, strategies as st
+from pasteboard import Pasteboard, PasteboardType
+from pathlib import Path
+from typing import Tuple
 
 STRING_TYPES = (
     pasteboard.String,
@@ -17,16 +20,15 @@ TEXT = st.characters(min_codepoint=1, blacklist_categories=("Cc", "Cs"))
 
 
 @given(TEXT)
-def test_get_set_contents_default(s):
-    assume(s.encode("utf-8"))
-    pb = pasteboard.Pasteboard()
+def test_get_set_contents_default(s: str) -> None:
+    pb = Pasteboard()
     assert pb.set_contents(s)
     assert pb.get_contents() == s
 
 
 @given(TEXT)
-def test_get_contents_diff_not_none_after_set(s):
-    pb = pasteboard.Pasteboard()
+def test_get_contents_diff_not_none_after_set(s: str) -> None:
+    pb = Pasteboard()
     assert pb.set_contents(s)
     assert pb.get_contents(diff=True) == s
     assert pb.get_contents(diff=True) is None
@@ -34,8 +36,8 @@ def test_get_contents_diff_not_none_after_set(s):
 
 @pytest.mark.parametrize("type", STRING_TYPES)
 @given(TEXT)
-def test_get_set_contents_string(type, s):
-    pb = pasteboard.Pasteboard()
+def test_get_set_contents_string(type: PasteboardType, s: str) -> None:
+    pb = Pasteboard()
     assert pb.set_contents(s, type=type)
     assert pb.get_contents(type=type) == s
     assert pb.get_contents(type=type, diff=True) is None
@@ -43,22 +45,22 @@ def test_get_set_contents_string(type, s):
 
 @pytest.mark.parametrize("type", BINARY_TYPES)
 @given(st.binary())
-def test_get_set_contents_data(type, s):
-    pb = pasteboard.Pasteboard()
-    assert pb.set_contents(s, type=type)
-    assert pb.get_contents(type=type) == s
+def test_get_set_contents_data(type: PasteboardType, b: bytes) -> None:
+    pb = Pasteboard()
+    assert pb.set_contents(b, type=type)
+    assert pb.get_contents(type=type) == b
     assert pb.get_contents(type=type, diff=True) is None
 
 
-def test_get_set_contents_with_null_char():
-    pb = pasteboard.Pasteboard()
+def test_get_set_contents_with_null_char() -> None:
+    pb = Pasteboard()
     assert pb.set_contents("abc\x00def")
     assert pb.get_contents() == "abc"
 
 
-def test_get_set_contents_with_emoji_santa():
+def test_get_set_contents_with_emoji_santa() -> None:
     s = "\x1f385"
-    pb = pasteboard.Pasteboard()
+    pb = Pasteboard()
     assert pb.set_contents(s)
     assert pb.get_contents() == s
 
@@ -75,11 +77,18 @@ def test_get_set_contents_with_emoji_santa():
         (pasteboard.TIFF, "public.tiff"),
     ],
 )
-def test_types_repr(type, name):
-    assert repr(type) == "<PasteboardType {}>".format(name)
+def test_types_repr(type: PasteboardType, name: str) -> None:
+    assert repr(type) == f"<PasteboardType {name}>"
 
 
-def mypy_run(tmp_path, content):
+def test_file_urls() -> None:
+    pb = Pasteboard()
+    assert pb.set_contents("abc\x00def")
+    assert pb.get_file_urls() is None
+    assert pb.get_file_urls(diff=True) is None
+
+
+def mypy_run(tmp_path: Path, content: str) -> Tuple[str, str, int]:
     py = tmp_path / "test.py"
     py.write_text(content)
     filename = str(py)
@@ -87,7 +96,7 @@ def mypy_run(tmp_path, content):
     return normal_report.replace(filename, "test.py"), error_report, exit_status
 
 
-def test_type_hints_pasteboard_valid(tmp_path):
+def test_type_hints_pasteboard_valid(tmp_path: Path) -> None:
     normal_report, error_report, exit_status = mypy_run(
         tmp_path,
         """
@@ -98,7 +107,7 @@ pb = Pasteboard()
     assert exit_status == 0, normal_report
 
 
-def test_type_hints_pasteboard_invalid_args(tmp_path):
+def test_type_hints_pasteboard_invalid_args(tmp_path: Path) -> None:
     normal_report, error_report, exit_status = mypy_run(
         tmp_path,
         """
@@ -110,7 +119,7 @@ pb = Pasteboard("bar")
     assert 'Too many arguments for "Pasteboard"' in normal_report
 
 
-def test_type_hints_pasteboard_invalid_kwargs(tmp_path):
+def test_type_hints_pasteboard_invalid_kwargs(tmp_path: Path) -> None:
     normal_report, error_report, exit_status = mypy_run(
         tmp_path,
         """
@@ -122,19 +131,20 @@ pb = Pasteboard(foo="bar")
     assert 'Unexpected keyword argument "foo" for "Pasteboard"' in normal_report
 
 
-def test_type_hints_get_contents_valid_no_args(tmp_path):
+def test_type_hints_get_contents_valid_no_args(tmp_path: Path) -> None:
     normal_report, error_report, exit_status = mypy_run(
         tmp_path,
         """
 from pasteboard import Pasteboard
+from typing import Optional
 pb = Pasteboard()
-s: str = pb.get_contents()
+s: Optional[str] = pb.get_contents()
 """,
     )
     assert exit_status == 0, normal_report
 
 
-def test_type_hints_get_contents_valid_diff_arg(tmp_path):
+def test_type_hints_get_contents_valid_diff_arg(tmp_path: Path) -> None:
     normal_report, error_report, exit_status = mypy_run(
         tmp_path,
         """
@@ -148,7 +158,7 @@ if s:
     assert exit_status == 0, normal_report
 
 
-def test_type_hints_get_contents_valid_type_args(tmp_path):
+def test_type_hints_get_contents_valid_type_args(tmp_path: Path) -> None:
     normal_report, error_report, exit_status = mypy_run(
         tmp_path,
         """
@@ -166,7 +176,7 @@ if s:
     assert exit_status == 0, normal_report
 
 
-def test_type_hints_get_contents_valid_both_args(tmp_path):
+def test_type_hints_get_contents_valid_both_args(tmp_path: Path) -> None:
     normal_report, error_report, exit_status = mypy_run(
         tmp_path,
         """
@@ -185,7 +195,7 @@ if s:
 
 
 @pytest.mark.parametrize("arg", ['"bar"', 'foo="bar"', 'type="bar"', 'diff="bar"'])
-def test_type_hints_get_contents_invalid_arg(arg, tmp_path):
+def test_type_hints_get_contents_invalid_arg(arg: str, tmp_path: Path) -> None:
     normal_report, error_report, exit_status = mypy_run(
         tmp_path,
         f"""
@@ -199,7 +209,7 @@ pb.get_contents({arg})
 
 
 @pytest.mark.parametrize("arg", ['"bar"', 'b"bar"'])
-def test_type_hints_set_contents_valid_no_args(arg, tmp_path):
+def test_type_hints_set_contents_valid_no_args(arg: str, tmp_path: Path) -> None:
     normal_report, error_report, exit_status = mypy_run(
         tmp_path,
         f"""
@@ -212,7 +222,7 @@ result: bool = pb.set_contents({arg})
 
 
 @pytest.mark.parametrize("arg", ['"bar"', 'b"bar"'])
-def test_type_hints_set_contents_valid_type_args(arg, tmp_path):
+def test_type_hints_set_contents_valid_type_args(arg: str, tmp_path: Path) -> None:
     normal_report, error_report, exit_status = mypy_run(
         tmp_path,
         f"""
@@ -224,7 +234,7 @@ result: bool = pb.set_contents({arg}, type=PNG)
     assert exit_status == 0, normal_report
 
 
-def test_type_hints_set_contents_invalid_arg(tmp_path):
+def test_type_hints_set_contents_invalid_arg(tmp_path: Path) -> None:
     normal_report, error_report, exit_status = mypy_run(
         tmp_path,
         f"""
@@ -237,7 +247,7 @@ result: bool = pb.set_contents(0)
     assert '"set_contents" of "Pasteboard" cannot be "int"' in normal_report
 
 
-def test_type_hints_set_contents_invalid_type_arg(tmp_path):
+def test_type_hints_set_contents_invalid_type_arg(tmp_path: Path) -> None:
     normal_report, error_report, exit_status = mypy_run(
         tmp_path,
         f"""
@@ -251,7 +261,7 @@ result: bool = pb.set_contents("", type="bar")
     assert msg in normal_report
 
 
-def test_type_hints_set_contents_invalid_kwarg(tmp_path):
+def test_type_hints_set_contents_invalid_kwarg(tmp_path: Path) -> None:
     normal_report, error_report, exit_status = mypy_run(
         tmp_path,
         f"""
@@ -267,7 +277,7 @@ result: bool = pb.set_contents("", foo="bar")
     )
 
 
-def test_type_hints_set_contents_invalid_result(tmp_path):
+def test_type_hints_set_contents_invalid_result(tmp_path: Path) -> None:
     normal_report, error_report, exit_status = mypy_run(
         tmp_path,
         f"""

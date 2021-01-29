@@ -62,6 +62,19 @@ takes two arguments:
 
 `set_contents` will return `True` if the pasteboard was successfully set; otherwise, `False`. It may also throw [RuntimeError](https://docs.python.org/3/library/exceptions.html#RuntimeError) if `data` can't be converted to an AppKit type.
 
+### Getting file URLs
+
+```pycon
+>>> import pasteboard
+>>> pb = pasteboard.Pasteboard()
+>>> pb.get_file_urls()
+('/Users/<user>/Documents/foo.txt', '/Users/<user>/Documents/bar.txt')
+```
+
+**Warning** This API is new, and may change in future.
+
+Returns a `Tuple` of strings, or `None`. Also supports the **diff** parameter analogue to `get_contents`.
+
 ## Development
 
 You don't need to know this if you're not changing `pasteboard.m` code. There are some integration tests in `tests.py` to check the module works as designed (using [pytest](https://docs.pytest.org/en/latest/) and [hypothesis](https://hypothesis.readthedocs.io/en/latest/)).
