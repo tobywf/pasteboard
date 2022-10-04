@@ -2,9 +2,9 @@ name: Release
 on:
   push:
     branches:
-    - workflow_release
+      - workflow_release
     tags:
-    - 'v[0-9]+.[0-9]+.[0-9]+'
+      - "v[0-9]+.[0-9]+.[0-9]+"
 
 jobs:
   build-release:
@@ -12,125 +12,125 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
 
     steps:
-    - name: Create artifacts directory
-      shell: bash
-      run: mkdir artifacts
-    - name: Checkout repository
-      uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      shell: bash
-      run: pip install poetry
+      - name: Create artifacts directory
+        shell: bash
+        run: mkdir artifacts
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        shell: bash
+        run: pip install poetry
 
-    - name: Build wheel
-      if: matrix.python-version != 3.9
-      shell: bash
-      run: poetry build --format "wheel"
-    - name: Build wheel and sdist
-      if: matrix.python-version == 3.9
-      shell: bash
-      run: poetry build
+      - name: Build wheel
+        if: matrix.python-version != 3.9
+        shell: bash
+        run: poetry build --format "wheel"
+      - name: Build wheel and sdist
+        if: matrix.python-version == 3.9
+        shell: bash
+        run: poetry build
 
-    - name: Resolve wheel name
-      id: resolve_wheel
-      shell: bash
-      run: |
-        wheel_path="$(echo dist/pasteboard-*.whl)"
-        echo "::set-output name=path::$wheel_path"
-        echo "wheel path: $wheel_path"
-        wheel_name="${wheel_path##*/}"
-        echo "::set-output name=name::$wheel_name"
-        echo "wheel name: $wheel_name"
-    - name: Upload wheel to artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: artifacts
-        path: ${{ steps.resolve_wheel.outputs.path }}
+      - name: Resolve wheel name
+        id: resolve_wheel
+        shell: bash
+        run: |
+          wheel_path="$(echo dist/pasteboard-*.whl)"
+          echo "::set-output name=path::$wheel_path"
+          echo "wheel path: $wheel_path"
+          wheel_name="${wheel_path##*/}"
+          echo "::set-output name=name::$wheel_name"
+          echo "wheel name: $wheel_name"
+      - name: Upload wheel to artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: artifacts
+          path: ${{ steps.resolve_wheel.outputs.path }}
 
-    - name: Resolve tar.gz name
-      id: resolve_targz
-      if: matrix.python-version == 3.9
-      shell: bash
-      run: |
-        targz_path="$(echo dist/pasteboard-*.tar.gz)"
-        echo "::set-output name=path::$targz_path"
-        echo "tar.gz path: $targz_path"
-        targz_name="${targz_path##*/}"
-        echo "::set-output name=name::$targz_name"
-        echo "tar.gz name: $targz_name"
-    - name: Upload tar.gz to artifacts
-      if: matrix.python-version == 3.9
-      uses: actions/upload-artifact@v2
-      with:
-        name: artifacts
-        path: ${{ steps.resolve_targz.outputs.path }}
+      - name: Resolve tar.gz name
+        id: resolve_targz
+        if: matrix.python-version == 3.9
+        shell: bash
+        run: |
+          targz_path="$(echo dist/pasteboard-*.tar.gz)"
+          echo "::set-output name=path::$targz_path"
+          echo "tar.gz path: $targz_path"
+          targz_name="${targz_path##*/}"
+          echo "::set-output name=name::$targz_name"
+          echo "tar.gz name: $targz_name"
+      - name: Upload tar.gz to artifacts
+        if: matrix.python-version == 3.9
+        uses: actions/upload-artifact@v2
+        with:
+          name: artifacts
+          path: ${{ steps.resolve_targz.outputs.path }}
 
   publish-release:
     name: publish-release
-    needs: ['build-release']
+    needs: ["build-release"]
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.9
-    - name: Install dependencies
-      run: pip install poetry
-    - name: Get release download URL
-      uses: actions/download-artifact@v2
-      with:
-        name: artifacts
-        path: artifacts
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.9
+      - name: Install dependencies
+        run: pip install poetry
+      - name: Get release download URL
+        uses: actions/download-artifact@v2
+        with:
+          name: artifacts
+          path: artifacts
 
-    - name: Create dist directory
-      shell: bash
-      run: mkdir dist
-    - name: Copy wheels
-      shell: bash
-      run: cp artifacts/*.whl dist/
-    - name: Copy tar.gz
-      shell: bash
-      run: cp artifacts/*.tar.gz dist/
-    - name: List all artifacts
-      shell: bash
-      run: ls -l dist/
+      - name: Create dist directory
+        shell: bash
+        run: mkdir dist
+      - name: Copy wheels
+        shell: bash
+        run: cp artifacts/*.whl dist/
+      - name: Copy tar.gz
+        shell: bash
+        run: cp artifacts/*.tar.gz dist/
+      - name: List all artifacts
+        shell: bash
+        run: ls -l dist/
 
-    - name: Get the branch and tag
-      id: info
-      shell: bash
-      run: |
-        branch="${GITHUB_REF#refs/heads/}"
-        echo "$branch"
-        if [[ "$branch" == "workflow_release" ]]; then
-          echo "::set-output name=version::TEST-0.0.0"
-          echo "::set-output name=dry_run::--dry-run"
-        else
-          echo "::set-output name=version::${GITHUB_REF#refs/tags/}"
-          echo "::set-output name=dry_run::"
-        fi
-        echo "::set-output name=date::$(env TZ=':America/Los_Angeles' date +'%Y-%m-%d')"
+      - name: Get the branch and tag
+        id: info
+        shell: bash
+        run: |
+          branch="${GITHUB_REF#refs/heads/}"
+          echo "$branch"
+          if [[ "$branch" == "workflow_release" ]]; then
+            echo "::set-output name=version::TEST-0.0.0"
+            echo "::set-output name=dry_run::--dry-run"
+          else
+            echo "::set-output name=version::${GITHUB_REF#refs/tags/}"
+            echo "::set-output name=dry_run::"
+          fi
+          echo "::set-output name=date::$(env TZ=':America/Los_Angeles' date +'%Y-%m-%d')"
 
-    - name: Create release
-      shell: bash
-      run: |
-        set -x
-        hub release create \
-          --draft \
-          --message "${{ steps.info.outputs.version }} (${{ steps.info.outputs.date }})" \
-          $(find ./dist -type f -printf "-a %p ") \
-          "${{ steps.info.outputs.version }}"
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Publish
-      run: |
-        poetry config pypi-token.pypi "${{ secrets.PYPI_TOKEN }}"
-        poetry publish ${{ steps.info.outputs.dry_run }}
+      - name: Create release
+        shell: bash
+        run: |
+          set -x
+          hub release create \
+            --draft \
+            --message "${{ steps.info.outputs.version }} (${{ steps.info.outputs.date }})" \
+            $(find ./dist -type f -printf "-a %p ") \
+            "${{ steps.info.outputs.version }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish
+        run: |
+          poetry config pypi-token.pypi "${{ secrets.PYPI_TOKEN }}"
+          poetry publish ${{ steps.info.outputs.dry_run }}
