@@ -1,7 +1,4 @@
-import sys
-from distutils.core import Extension
-
-assert sys.platform == "darwin", "pasteboard only works on macOS"
+from setuptools import setup, Extension
 
 pasteboard = Extension(
     "pasteboard._native",
@@ -11,6 +8,7 @@ pasteboard = Extension(
     language="objective-c",
 )
 
-
-def build(setup_kwargs):
-    setup_kwargs.update({"ext_modules": [pasteboard], "zip_safe": False})
+setup(
+    ext_modules=[pasteboard],
+    zip_safe=False,
+)
