@@ -38,7 +38,7 @@ dev = [
     "hypothesis==6.93.0",
     "black==23.12.1",
     "mypy==1.8.0",
-    "pre-commit==3.6.0",
+    "pre-commit==3.5.0",
 ]
 
 [tool.setuptools_scm]
