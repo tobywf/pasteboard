@@ -17,10 +17,14 @@ classifiers = [
     "Intended Audience :: Developers",
     "Natural Language :: English",
     "Operating System :: MacOS :: MacOS X",
+    "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
     "Programming Language :: Objective C",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Desktop Environment",
     "Topic :: Software Development :: Libraries",
@@ -30,13 +34,11 @@ requires-python = ">= 3.8"
 
 [project.optional-dependencies]
 dev = [
-    "pytest",
-    "hypothesis",
-    "black",
-    "mypy",
-    "ipython",
-    "jedi",
-    "pre-commit",
+    "pytest==7.4.4",
+    "hypothesis==6.93.0",
+    "black==23.12.1",
+    "mypy==1.8.0",
+    "pre-commit==3.6.0",
 ]
 
 [tool.setuptools_scm]
