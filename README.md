@@ -91,16 +91,18 @@ You may also run the hooks at any time:
 pre-commit run --all-files
 ```
 
-Dependencies are managed via [poetry](https://python-poetry.org/). To install all dependencies, use:
+To install development dependencies, use:
 
 ```
-poetry install
+python3 -m venv env
+source env/bin/activate
+pip install .[dev]
 ```
 
 This will also install development dependencies (`pytest`). To run the tests:
 
 ```
-poetry run pytest tests.py --verbose
+pytest tests.py --verbose
 ```
 
 ## License
