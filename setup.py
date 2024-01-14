@@ -4,7 +4,6 @@ pasteboard = Extension(
     "pasteboard._native",
     ["src/pasteboard/pasteboard.m"],
     extra_compile_args=[
-        "-mmacosx-version-min=10.13",
         "-Wall",
         "-Wextra",
         "-Wpedantic",
