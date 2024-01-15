@@ -1,6 +1,6 @@
 # Pasteboard
 
-[![License: MPL 2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0) [![Build](https://github.com/tobywf/pasteboard/workflows/Build/badge.svg?branch=master&event=push)](https://github.com/tobywf/pasteboard/actions)
+[![License: MPL 2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0) [![CI](https://github.com/tobywf/pasteboard/actions/workflows/check.yaml/badge.svg)](https://github.com/tobywf/pasteboard/actions)
 
 [Pasteboard](https://pypi.org/project/pasteboard/) exposes Python bindings for reading and writing macOS' AppKit [NSPasteboard](https://developer.apple.com/documentation/appkit/nspasteboard). This allows retrieving different formats (HTML/RTF fragments, PDF/PNG/TIFF) and efficient polling of the pasteboard.
 
@@ -8,7 +8,7 @@ Now with type hints!
 
 ## Installation
 
-Obviously, this module will only compile on **macOS**:
+Python 3.8+ is required. Obviously, this module will only compile on **macOS**:
 
 ```bash
 pip install pasteboard
